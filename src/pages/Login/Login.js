@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './Login.css';
 
@@ -10,6 +10,7 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +19,8 @@ export const Login = () => {
 
     try {
       await login(email, password);
-      navigate('/');
+      const dest = location.state?.from?.pathname || '/';
+      navigate(dest, { replace: true });
     } catch (err) {
       setError(
         err.response?.data?.message ||

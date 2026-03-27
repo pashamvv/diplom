@@ -2,6 +2,20 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  position: relative;
+  isolation: isolate;
+}
+
+.app-main::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 560px at 10% 0%, var(--accent-glow), transparent 58%),
+    radial-gradient(820px 520px at 92% 8%, rgba(42, 171, 238, 0.1), transparent 60%),
+    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .page-placeholder {
@@ -18,14 +32,51 @@
 .page-placeholder h1 {
   font-size: 32px;
   margin-bottom: 16px;
+  color: var(--text-primary);
 }
 
 .page-placeholder p {
   font-size: 16px;
-  color: #999;
+  color: var(--text-secondary);
 }
 
-/* Адаптив */
+.theme-fab {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: var(--glass-strong);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-medium);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.theme-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-large);
+}
+
+.theme-fab-icon {
+  font-size: 16px;
+}
+
+.theme-fab-label {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
 @media (max-width: 768px) {
   .page-placeholder {
     padding: 40px 20px;
@@ -33,5 +84,15 @@
 
   .page-placeholder h1 {
     font-size: 24px;
+  }
+
+  .theme-fab {
+    right: 12px;
+    bottom: 12px;
+    padding: 10px 12px;
+  }
+
+  .theme-fab-label {
+    display: none;
   }
 }

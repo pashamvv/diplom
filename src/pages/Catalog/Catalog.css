@@ -1,161 +1,278 @@
-.catalog-page {
-  background-color: #f9f9f9;
-  min-height: calc(100vh - 70px);
-  padding: 20px 0;
+:root {
+  --bg: var(--page-bg);
+  --card: var(--surface-strong);
+  --border: var(--glass-border);
+
+  --text: var(--text-primary);
+  --muted: var(--text-secondary);
+
+  --accent: var(--primary-color);
+  --accent-soft: rgba(42,171,238,0.12);
+
+  --shadow: var(--shadow-medium);
+  --radius: 18px;
 }
 
-.catalog-container {
-  max-width: 1400px;
+
+.c-page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 30px 20px;
+}
+
+.c-shell {
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+
+.c-topbar {
   display: flex;
-  gap: 20px;
-  padding: 0 20px;
-}
-
-/* Боковая панель фильтров */
-.catalog-sidebar {
-  width: 250px;
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  height: fit-content;
-  position: sticky;
-  top: 90px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.catalog-sidebar h3 {
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.filter-group {
+  justify-content: space-between;
+  align-items: flex-end;
   margin-bottom: 24px;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 16px;
 }
 
-.filter-group:last-child {
-  border-bottom: none;
-}
-
-.filter-group h4 {
-  font-size: 14px;
+.c-title {
+  font-size: 28px;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 12px;
+  margin: 0;
+  color: var(--text);
 }
 
-.filter-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  margin-bottom: 8px;
+.c-subtitle {
+  margin-top: 6px;
   font-size: 14px;
+  color: var(--muted);
 }
 
-.filter-item input {
-  cursor: pointer;
+.c-pill {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.filter-item span {
-  color: #666;
-  transition: color 0.3s;
-}
 
-.filter-item:hover span {
-  color: #2aabee;
-}
-
-.price-inputs {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.price-inputs input {
-  flex: 1;
-  padding: 8px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  font-size: 12px;
-}
-
-.price-inputs span {
-  color: #999;
-}
-
-/* Основной контент */
-.catalog-main {
-  flex: 1;
-}
-
-.catalog-header {
-  margin-bottom: 30px;
-}
-
-.catalog-header h1 {
-  font-size: 32px;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.search-info {
-  color: #999;
-  font-size: 14px;
-}
-
-/* Сетка товаров */
-.products-grid {
+.c-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
 }
 
-.loading {
-  text-align: center;
-  padding: 40px;
-  color: #999;
+@media (max-width: 980px) {
+  .c-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.c-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  position: sticky;
+  top: 20px;
+  backdrop-filter: blur(18px);
+}
+
+.c-cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.c-cardHead h3 {
   font-size: 16px;
+  margin: 0;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background-color: white;
-  border-radius: 8px;
-  color: #999;
-  font-size: 16px;
+.c-section {
+  margin-bottom: 22px;
 }
 
-@media (max-width: 768px) {
-  .catalog-container {
-    flex-direction: column;
-  }
+.c-sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
 
-  .catalog-sidebar {
-    width: 100%;
-    position: static;
-  }
 
-  .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-  }
+.c-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 10px 0;
+}
 
-  .catalog-header h1 {
-    font-size: 24px;
+
+.c-radioRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.c-radioRow:hover {
+  background: #f3f4f6;
+}
+
+.c-radio {
+  accent-color: var(--accent);
+}
+
+.c-radioText {
+  font-size: 14px;
+  color: var(--text);
+}
+
+
+.c-priceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.c-inputWrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px 12px;
+  background: #fafafa;
+  transition: border 0.15s ease;
+}
+
+.c-inputWrap:focus-within {
+  border-color: var(--accent);
+}
+
+.c-inputPrefix {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.c-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  color: var(--text);
+}
+
+.c-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.c-main {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  min-width: 0;
+  backdrop-filter: blur(18px);
+}
+
+
+.c-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 1200px) {
+  .c-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .c-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.c-gridItem {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.c-gridItem:hover {
+  transform: translateY(-3px);
+}
+
+
+.c-state {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.c-stateTitle {
+  font-size: 18px;
+  color: var(--text);
+}
+
+@media (max-width: 980px) {
+  .c-card {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .c-page {
+    padding: 20px 14px 28px;
   }
 
-  .catalog-container {
-    padding: 0 10px;
+  .c-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .c-title {
+    font-size: 24px;
+  }
+
+  .c-card,
+  .c-main {
+    padding: 16px;
+  }
+
+  .c-priceGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .c-page {
+    padding-inline: 12px;
+  }
+
+  .c-layout {
+    gap: 16px;
   }
 }

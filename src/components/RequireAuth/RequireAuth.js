@@ -1,13 +1,9 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-
-/**
- * Компонент для защиты маршрутов
- * Требует аутентификации
- */
 export const RequireAuth = ({ children, requiredRole = null }) => {
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading, user, isAdmin } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -17,13 +13,17 @@ export const RequireAuth = ({ children, requiredRole = null }) => {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
 
-  // Проверка роли, если она требуется
-  if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  if (requiredRole) {
+    if (requiredRole === 'admin' && !isAdmin) {
+      return <Navigate to="/" replace />;
+    }
+    if (requiredRole !== 'admin' && user?.role !== requiredRole) {
+      return <Navigate to="/" replace />;
+    }
   }
 
   return children;
