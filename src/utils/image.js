@@ -6,6 +6,7 @@ export function getImageSrc(image) {
 
   const t = image.trim();
   if (!t) return FALLBACK_IMG;
+  if (/^\d{2,4}x\d{2,4}$/i.test(t)) return FALLBACK_IMG;
 
   if (t.startsWith("http://") || t.startsWith("https://")) return t;
 

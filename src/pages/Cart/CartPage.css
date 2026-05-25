@@ -97,8 +97,11 @@
 .item-image {
   width: 100px;
   height: 100px;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 6px;
+  box-sizing: border-box;
   border-radius: 4px;
+  background: rgba(42, 171, 238, 0.06);
 }
 
 .item-info {

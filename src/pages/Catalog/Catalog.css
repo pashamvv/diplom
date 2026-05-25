@@ -47,12 +47,47 @@
 }
 
 .c-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 14px;
   border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: linear-gradient(135deg, rgba(141, 220, 255, 0.28), rgba(91, 197, 255, 0.2));
+  color: #0b7fb6;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid rgba(91, 197, 255, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 12px 30px rgba(42, 171, 238, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.c-pillCount {
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  color: #086ea2;
+}
+
+.c-pillLabel {
   font-size: 13px;
-  font-weight: 500;
+  line-height: 1;
+  color: inherit;
+}
+
+[data-theme='dark'] .c-pill {
+  background: linear-gradient(135deg, rgba(111, 214, 255, 0.3), rgba(58, 181, 255, 0.24));
+  color: #9be3ff;
+  border-color: rgba(123, 214, 255, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 14px 34px rgba(0, 0, 0, 0.22);
+}
+
+[data-theme='dark'] .c-pillCount {
+  color: #dcf6ff;
 }
 
 
@@ -124,7 +159,7 @@
 }
 
 .c-radioRow:hover {
-  background: #f3f4f6;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .c-radio {
@@ -150,12 +185,14 @@
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 8px 12px;
-  background: #fafafa;
-  transition: border 0.15s ease;
+  background: rgba(255, 255, 255, 0.06);
+  transition: border 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .c-inputWrap:focus-within {
   border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 4px rgba(42, 171, 238, 0.12);
 }
 
 .c-inputPrefix {
@@ -170,6 +207,13 @@
   font-size: 14px;
   background: transparent;
   color: var(--text);
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.c-input::-webkit-outer-spin-button,
+.c-input::-webkit-inner-spin-button {
+  margin: 0;
 }
 
 .c-hint {

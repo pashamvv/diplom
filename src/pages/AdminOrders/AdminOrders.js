@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ordersAPI } from '../../api/endpoints';
 import '../Admin.css';
 
@@ -106,9 +107,24 @@ export const AdminOrders = () => {
         <h1>Управление заказами</h1>
       </div>
 
-      {editingOrder && (
-        <div className="admin-modal-overlay" onClick={closeStatusModal}>
-          <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
+      <AnimatePresence>
+        {editingOrder && (
+        <motion.div
+          className="admin-modal-overlay"
+          onClick={closeStatusModal}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          <motion.div
+            className="admin-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 22, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 14, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="admin-modal-header">
               <div>
                 <span className="admin-modal-caption">Заказы</span>
@@ -116,8 +132,13 @@ export const AdminOrders = () => {
                 <p>Смена статуса заказа теперь открывается в отдельной аккуратной модалке.</p>
               </div>
 
-              <button type="button" className="admin-modal-close" onClick={closeStatusModal}>
-                Закрыть
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={closeStatusModal}
+                aria-label="Закрыть"
+              >
+                ×
               </button>
             </div>
 
@@ -179,9 +200,10 @@ export const AdminOrders = () => {
                 Отмена
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
       <div className="admin-filters">
         <div className="search-box">
           <input

@@ -47,6 +47,17 @@
   box-shadow: 0 10px 24px rgba(42, 171, 238, 0.18);
 }
 
+.admin-sidebar-brand-svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 4px 10px rgba(255, 255, 255, 0.12));
+}
+
 .admin-sidebar-brand strong {
   display: block;
   color: #0f172a;

@@ -1,15 +1,8 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { authAPI } from "../api/endpoints";
 
 export const AuthContext = createContext();
-export const getAdminEmails = () => {
-  const stored = localStorage.getItem("admin_emails");
-  if (stored) return JSON.parse(stored);
-  return ["admin@example.com", "admin@techstore.com"];
-};
-export const saveAdminEmails = (emails) => {
-  localStorage.setItem("admin_emails", JSON.stringify(emails));
-};
+
 const decodeToken = (token) => {
   try {
     if (!token || token === "undefined") return null;
@@ -28,28 +21,43 @@ const decodeToken = (token) => {
     return null;
   }
 };
+
+const hasAdminRole = (value) => {
+  if (!value) return false;
+
+  if (typeof value === "string") {
+    return value.toUpperCase().includes("ADMIN");
+  }
+
+  if (Array.isArray(value)) {
+    return value.some((item) => hasAdminRole(item));
+  }
+
+  return false;
+};
+
 const isAdminFrom = (user, token) => {
   try {
-    if (user) {
-      if (user.role && String(user.role).toUpperCase() === "ADMIN") return true;
-      if (user.isAdmin === true || user.admin === true) return true;
+    if (hasAdminRole(user?.role) || hasAdminRole(user?.user_role)) {
+      return true;
     }
 
     if (token) {
       const decoded = decodeToken(token);
       if (decoded) {
-        const roles = [decoded.role, decoded.user_role, decoded.roles, decoded?.permissions];
-        for (const r of roles) {
-          if (!r) continue;
-          if (typeof r === "string" && r.toUpperCase().includes("ADMIN")) return true;
-          if (Array.isArray(r) && r.some((x) => String(x).toUpperCase().includes("ADMIN"))) return true;
+        const roleSources = [
+          decoded.role,
+          decoded.user_role,
+          decoded.roles,
+          decoded.permissions,
+        ];
+
+        for (const roleSource of roleSources) {
+          if (hasAdminRole(roleSource)) {
+            return true;
+          }
         }
       }
-    }
-
-    if (user?.email) {
-      const admins = getAdminEmails();
-      if (admins.map((e) => e.toLowerCase()).includes(user.email.toLowerCase())) return true;
     }
 
     return false;
@@ -102,30 +110,80 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const token = localStorage.getItem("token");
+
+  const syncUserState = useCallback((nextUser) => {
+    const fallbackUser = (() => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        return storedUser ? JSON.parse(storedUser) : {};
+      } catch {
+        return {};
+      }
+    })();
+
+    const normalizedUser = normalizeUserData(nextUser, fallbackUser);
+    setIsAuthenticated(true);
+    localStorage.setItem("user", JSON.stringify(normalizedUser));
+    setUser(normalizedUser);
+    return normalizedUser;
+  }, []);
+
+  const refreshUser = useCallback(async () => {
+    const response = await authAPI.me();
+    return syncUserState(response.data);
+  }, [syncUserState]);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem("token");
         const storedUser = localStorage.getItem("user");
 
+        localStorage.removeItem("admin_emails");
+
+        if (!token || token === "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser(null);
+          setIsAuthenticated(false);
+          return;
+        }
+
+        let storedUserFallback = {};
         if (storedUser && storedUser !== "undefined") {
           try {
-            setUser(JSON.parse(storedUser));
-            setIsAuthenticated(true);
+            storedUserFallback = JSON.parse(storedUser);
+            if (storedUserFallback && Object.keys(storedUserFallback).length > 0) {
+              setUser(storedUserFallback);
+              setIsAuthenticated(true);
+            }
           } catch {
             localStorage.removeItem("user");
           }
         }
 
-        if (token) {
-          try {
-            const response = await authAPI.me();
-            const normalizedUser = normalizeUserData(response.data, JSON.parse(storedUser || "{}"));
-            setUser(normalizedUser);
-            setIsAuthenticated(true);
-            localStorage.setItem("user", JSON.stringify(normalizedUser));
-          } catch (apiError) {
-            console.error("Error fetching user data:", apiError);
+        try {
+          const response = await authAPI.me();
+          const normalizedUser = normalizeUserData(response.data, storedUserFallback);
+
+          setUser(normalizedUser);
+          setIsAuthenticated(true);
+          localStorage.setItem("user", JSON.stringify(normalizedUser));
+        } catch (apiError) {
+          console.error("Error fetching user data:", apiError);
+
+          if (apiError?.response?.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setUser(null);
+            setIsAuthenticated(false);
+            return;
+          }
+
+          if (!storedUserFallback || Object.keys(storedUserFallback).length === 0) {
+            setUser(null);
+            setIsAuthenticated(false);
           }
         }
       } catch (error) {
@@ -141,6 +199,7 @@ export const AuthProvider = ({ children }) => {
 
     checkAuth();
   }, []);
+
   const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
@@ -174,45 +233,47 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
   };
+
   const register = async (email, password, full_name) => {
-  try {
-    await authAPI.register(email, password, full_name, 0);
-    const loginRes = await authAPI.login(email, password);
-
-    const token = loginRes.data.access_token;
-    if (!token) throw new Error("Токен не получен после логина");
-
-    localStorage.setItem("token", token);
-
-    let userData = normalizeUserData(loginRes.data, {
-      email,
-      role: loginRes.data.role || "user",
-      full_name,
-      name: full_name,
-    });
-
     try {
-      const meResponse = await authAPI.me();
-      if (meResponse?.data) {
-        userData = normalizeUserData(meResponse.data, userData);
+      await authAPI.register(email, password, full_name, 0);
+      const loginRes = await authAPI.login(email, password);
+
+      const token = loginRes.data.access_token;
+      if (!token) throw new Error("Токен не получен после логина");
+
+      localStorage.setItem("token", token);
+
+      let userData = normalizeUserData(loginRes.data, {
+        email,
+        role: loginRes.data.role || "user",
+        full_name,
+        name: full_name,
+      });
+
+      try {
+        const meResponse = await authAPI.me();
+        if (meResponse?.data) {
+          userData = normalizeUserData(meResponse.data, userData);
+        }
+      } catch (meError) {
+        console.error("Error fetching user profile after register:", meError);
       }
-    } catch (meError) {
-      console.error("Error fetching user profile after register:", meError);
+
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      setUser(userData);
+      setIsAuthenticated(true);
+
+      return userData;
+    } catch (error) {
+      console.error("Register failed:", error);
+      console.error("Status:", error?.response?.status);
+      console.error("Detail:", error?.response?.data);
+      throw error;
     }
+  };
 
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    setUser(userData);
-    setIsAuthenticated(true);
-
-    return userData;
-  } catch (error) {
-    console.error("Register failed:", error);
-    console.error("Status:", error?.response?.status);
-    console.error("Detail:", error?.response?.data);
-    throw error;
-  }
-};
   const logout = async () => {
     try {
       await authAPI.logout();
@@ -222,22 +283,26 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("cart");
+      localStorage.removeItem("admin_emails");
       setUser(null);
       setIsAuthenticated(false);
     }
   };
 
-  const token = localStorage.getItem("token");
-
-  const value = {
-    user,
-    isAuthenticated,
-    loading,
-    login,
-    register,
-    logout,
-    isAdmin: isAdminFrom(user, token),
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated,
+      loading,
+      login,
+      register,
+      logout,
+      refreshUser,
+      setUserData: syncUserState,
+      isAdmin: isAdminFrom(user, token),
+    }),
+    [user, isAuthenticated, loading, refreshUser, syncUserState, token]
+  );
 
   useEffect(() => {
     if (!loading) {

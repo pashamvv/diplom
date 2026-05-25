@@ -7,6 +7,8 @@ export const AdminDashboard = () => {
     totalOrders: 0,
     totalProducts: 0,
     totalRevenue: 0,
+    cancelledOrders: 0,
+    cancelledRevenue: 0,
     lowStockProducts: 0,
     salesData: [],
     topProducts: [],
@@ -53,7 +55,16 @@ export const AdminDashboard = () => {
         (p) => Number(p.stock_quantity || 0) < 5
       ).length;
 
+      const cancelledOrdersData = ordersData.filter(
+        (order) => String(order?.status || "").toLowerCase() === "cancelled"
+      );
+
       const totalRevenue = ordersData.reduce(
+        (sum, order) => sum + Number(order.total_price || 0),
+        0
+      );
+
+      const cancelledRevenue = cancelledOrdersData.reduce(
         (sum, order) => sum + Number(order.total_price || 0),
         0
       );
@@ -62,6 +73,8 @@ export const AdminDashboard = () => {
         totalOrders: ordersData.length,
         totalProducts: productsData.length,
         totalRevenue,
+        cancelledOrders: cancelledOrdersData.length,
+        cancelledRevenue,
         lowStockProducts: lowStock,
         salesData,
         topProducts,
@@ -162,6 +175,10 @@ export const AdminDashboard = () => {
       )
     : 100;
 
+  const cancellationRate = stats.totalOrders
+    ? Math.round((stats.cancelledOrders / stats.totalOrders) * 100)
+    : 0;
+
   const salesBars = stats.salesData.slice(0, 6).map((item, index) => {
     const value = Number(item.total ?? item.amount ?? item.value ?? 0);
     const label = item.date || item.name || `Период ${index + 1}`;
@@ -180,7 +197,14 @@ export const AdminDashboard = () => {
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon stat-icon-orders">
-            <span className="stat-icon-chip">Заказы</span>
+            <span className="stat-icon-chip">
+              <svg className="stat-chip-svg" viewBox="0 0 32 32" aria-hidden="true">
+                <rect x="7" y="8" width="18" height="16" rx="3" />
+                <path d="M11 12h10" />
+                <path d="M11 16h10" />
+                <path d="M11 20h7" />
+              </svg>
+            </span>
           </div>
           <div>
             <h3>Заказы</h3>
@@ -190,7 +214,13 @@ export const AdminDashboard = () => {
 
         <div className="stat-card">
           <div className="stat-icon stat-icon-products">
-            <span className="stat-icon-chip">Товары</span>
+            <span className="stat-icon-chip">
+              <svg className="stat-chip-svg" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M16 6 24 10.5 16 15 8 10.5 16 6Z" />
+                <path d="M8 10.5V20.5L16 25.5 24 20.5V10.5" />
+                <path d="M16 15v10.5" />
+              </svg>
+            </span>
           </div>
           <div>
             <h3>Товары</h3>
@@ -200,7 +230,15 @@ export const AdminDashboard = () => {
 
         <div className="stat-card">
           <div className="stat-icon stat-icon-revenue">
-            <span className="stat-icon-chip">Выручка</span>
+            <span className="stat-icon-chip">
+              <svg className="stat-chip-svg" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M9 22h14" />
+                <path d="M11 19V13" />
+                <path d="M16 19V10" />
+                <path d="M21 19v-4" />
+                <path d="m10 11 4-3 3 2 5-3" />
+              </svg>
+            </span>
           </div>
           <div>
             <h3>Выручка</h3>
@@ -212,7 +250,13 @@ export const AdminDashboard = () => {
 
         <div className="stat-card alert">
           <div className="stat-icon stat-icon-risk">
-            <span className="stat-icon-chip">Риск</span>
+            <span className="stat-icon-chip">
+              <svg className="stat-chip-svg" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M16 7 25 23H7L16 7Z" />
+                <path d="M16 13v5" />
+                <circle cx="16" cy="21" r="1" />
+              </svg>
+            </span>
           </div>
           <div>
             <h3>Мало товаров</h3>
@@ -268,6 +312,25 @@ export const AdminDashboard = () => {
           ) : (
             <p className="empty-state">Недостаточно данных для нижнего графика продаж</p>
           )}
+
+          <div className="analytics-loss-grid">
+            <div className="analytics-loss-card">
+              <span className="analytics-loss-label">Отменённые заказы</span>
+              <strong>{stats.cancelledOrders}</strong>
+            </div>
+            <div className="analytics-loss-card analytics-loss-card-danger">
+              <span className="analytics-loss-label">Потерянная выручка</span>
+              <strong>{stats.cancelledRevenue.toFixed(0)}₽</strong>
+            </div>
+            <div className="analytics-loss-card">
+              <span className="analytics-loss-label">Доля отмен</span>
+              <strong>{cancellationRate}%</strong>
+            </div>
+          </div>
+
+          <p className="analytics-note analytics-note-left">
+            Отмены показывают, сколько заказов и выручки магазин теряет после оформления.
+          </p>
         </div>
 
         <div className="analytics-panel">

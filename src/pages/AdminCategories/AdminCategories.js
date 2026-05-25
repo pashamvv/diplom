@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { categoriesAPI } from "../../api/endpoints";
 import "../Admin.css";
 
@@ -133,9 +134,24 @@ export const AdminCategories = () => {
           {showForm ? "Отмена" : "Добавить категорию"}
         </button>
       </div>
-      {showForm && (
-        <div className="admin-modal-overlay" onClick={resetForm}>
-          <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
+      <AnimatePresence>
+        {showForm && (
+        <motion.div
+          className="admin-modal-overlay"
+          onClick={resetForm}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          <motion.div
+            className="admin-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 22, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 14, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="admin-modal-header">
               <div>
                 <span className="admin-modal-caption">Категории</span>
@@ -143,8 +159,13 @@ export const AdminCategories = () => {
                 <p>Заполни основные поля и при необходимости укажи родительскую категорию.</p>
               </div>
 
-                <button type="button" className="admin-modal-close" onClick={resetForm}>
-                Закрыть
+                <button
+                  type="button"
+                  className="admin-modal-close"
+                  onClick={resetForm}
+                  aria-label="Закрыть"
+                >
+                  ×
                 </button>
             </div>
 
@@ -199,9 +220,10 @@ export const AdminCategories = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
       <div className="admin-filters">
         <div className="search-box">
           <input

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { productsAPI, categoriesAPI } from "../../api/endpoints";
 import "./Admin.css";
 
@@ -394,9 +395,24 @@ export const AdminProducts = () => {
         )}
       </div>
 
-      {showModal && (
-        <div className="ios-modal-overlay" onClick={closeModal}>
-          <div className="ios-modal glass-card" onClick={(e) => e.stopPropagation()}>
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            className="ios-modal-overlay"
+            onClick={closeModal}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+          <motion.div
+            className="ios-modal glass-card"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="ios-modal-header">
               <div>
                 <div className="ios-caption">
@@ -405,8 +421,13 @@ export const AdminProducts = () => {
                 <h2>{editingId ? "Изменить товар" : "Добавить товар"}</h2>
               </div>
 
-              <button className="ios-close-btn" onClick={closeModal}>
-                Закрыть
+              <button
+                type="button"
+                className="ios-close-btn"
+                onClick={closeModal}
+                aria-label="Закрыть"
+              >
+                ×
               </button>
             </div>
 
@@ -516,9 +537,10 @@ export const AdminProducts = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

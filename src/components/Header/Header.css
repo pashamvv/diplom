@@ -43,7 +43,25 @@
 }
 
 .logo-icon {
-  font-size: 24px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(42, 171, 238, 0.18), rgba(42, 171, 238, 0.08));
+  box-shadow: 0 10px 24px rgba(42, 171, 238, 0.14);
+}
+
+.logo-icon-svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 4px 10px rgba(255, 255, 255, 0.1));
 }
 
 .logo-text {
@@ -110,10 +128,43 @@
 .cart-link {
   position: relative;
   text-decoration: none;
-  font-size: 24px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
   color: var(--text-primary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.cart-link:hover {
+  transform: translateY(-1px);
+  color: var(--primary-color);
+  border-color: rgba(42, 171, 238, 0.28);
+}
+
+.cart-icon-image {
+  width: 24px;
+  height: 24px;
+  display: block;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .cart-badge {
@@ -139,20 +190,90 @@
   gap: 15px;
 }
 
-.admin-btn,
-.orders-link,
+.header-action-wrap {
+  position: relative;
+}
+
+.header-action-link,
 .auth-link {
   text-decoration: none;
   color: var(--text-primary);
   font-size: 14px;
   font-weight: 500;
-  transition: color 0.3s;
+  transition: color 0.3s, border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 
-.admin-btn:hover,
-.orders-link:hover,
+.header-action-link {
+  width: 44px;
+  height: 44px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.header-action-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, rgba(42, 171, 238, 0.18), transparent 68%);
+  opacity: 0;
+  transform: scale(0.82);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.header-action-link:hover,
 .auth-link:hover {
   color: #2aabee;
+  border-color: rgba(42, 171, 238, 0.28);
+}
+
+.header-action-link:hover::before,
+.header-action-link.is-active::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.header-action-link.is-active {
+  color: #59c3ff;
+  border-color: rgba(42, 171, 238, 0.34);
+  background: linear-gradient(135deg, rgba(42, 171, 238, 0.18), rgba(42, 171, 238, 0.06));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 10px 26px rgba(42, 171, 238, 0.16);
+}
+
+.header-action-icon {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.header-action-icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header-action-link:hover .header-action-icon,
+.header-action-link.is-active .header-action-icon {
+  transform: translateY(-1px) scale(1.06);
+  filter: drop-shadow(0 4px 10px rgba(42, 171, 238, 0.22));
 }
 
 .register-link {
@@ -226,6 +347,7 @@
 }
 
 .profile-modal {
+  position: relative;
   background: var(--surface-strong);
   border-radius: 20px;
   padding: 20px;
@@ -233,6 +355,31 @@
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-large);
   backdrop-filter: blur(22px);
+}
+
+.profile-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.profile-modal-close:hover {
+  transform: scale(1.03);
+  background: var(--surface-strong);
 }
 
 .profile-modal h3 {

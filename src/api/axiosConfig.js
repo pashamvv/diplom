@@ -11,6 +11,13 @@ const axiosInstance = axios.create({
 });
 axiosInstance.interceptors.request.use(
   (config) => {
+    if (config.skipAuth) {
+      if (config.headers?.Authorization) {
+        delete config.headers.Authorization;
+      }
+      return config;
+    }
+
     const token = localStorage.getItem("token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -27,16 +34,19 @@ axiosInstance.interceptors.response.use(
 
     const status = error.response.status;
     const currentPath = window.location.pathname;
+    const isPublicRequest = Boolean(error.config?.skipAuth);
 
-    if (status === 401) {
+    if (status === 401 && !isPublicRequest) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       if (currentPath !== "/login") window.location.href = "/login";
     }
 
-    if (status === 403) {
-      alert("У вас нет прав доступа");
-      if (currentPath !== "/") window.location.href = "/";
+    if (status === 403 && !isPublicRequest) {
+      if (currentPath.startsWith("/admin")) {
+        alert("У вас нет прав доступа");
+        if (currentPath !== "/") window.location.href = "/";
+      }
     }
 
     return Promise.reject(error);

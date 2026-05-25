@@ -18,6 +18,31 @@
     linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
+.app-main::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(420px 260px at 88% 88%, rgba(98, 207, 255, 0.2), transparent 68%),
+    radial-gradient(520px 320px at 12% 12%, rgba(255, 255, 255, 0.12), transparent 72%);
+}
+
+.app-main.theme-transitioning::after {
+  animation: themePulse 0.76s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.route-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  will-change: opacity, transform, filter;
+  transform-origin: 50% 24px;
+}
+
 .page-placeholder {
   max-width: 1400px;
   margin: 0 auto;
@@ -66,7 +91,35 @@
 }
 
 .theme-fab-icon {
-  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(42, 171, 238, 0.12);
+  color: var(--primary-color);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.theme-fab-icon-svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-fab.light .theme-fab-icon {
+  background: rgba(15, 23, 42, 0.06);
+  color: #0f172a;
+}
+
+.theme-fab.dark .theme-fab-icon {
+  background: rgba(98, 207, 255, 0.16);
+  color: #dff7ff;
 }
 
 .theme-fab-label {
@@ -74,6 +127,57 @@
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+@keyframes routeRevealIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.998);
+    filter: blur(2px);
+  }
+
+  60% {
+    opacity: 0.92;
+    transform: translateY(1px) scale(0.9995);
+    filter: blur(0.5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes routeRevealOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.998);
+    filter: blur(1px);
+  }
+}
+
+@keyframes themePulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.996);
+  }
+
+  38% {
+    opacity: 0.68;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.006);
+  }
 }
 
 
@@ -95,4 +199,5 @@
   .theme-fab-label {
     display: none;
   }
+
 }

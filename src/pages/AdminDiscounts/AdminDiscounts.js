@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { discountsAPI, productsAPI } from '../../api/endpoints';
+import { isDiscountActive, toDateInputValue } from '../../utils/pricing';
 import '../Admin.css';
 
 export const AdminDiscounts = () => {
@@ -111,9 +113,9 @@ export const AdminDiscounts = () => {
     setFormData({
       product_id: String(discount.product_id ?? ''),
       discount_percent: String(discount.discount_percent ?? ''),
-      start_date: discount.start_date || '',
-      end_date: discount.end_date || '',
-      is_active: discount.is_active !== false,
+      start_date: toDateInputValue(discount.start_date),
+      end_date: toDateInputValue(discount.end_date),
+      is_active: ![false, 0, '0', 'false', 'inactive'].includes(discount.is_active),
     });
   };
 
@@ -130,8 +132,7 @@ export const AdminDiscounts = () => {
 
     try {
       if (editingId) {
-        await discountsAPI.delete(editingId);
-        await discountsAPI.create(payload);
+        await discountsAPI.update(editingId, payload);
       } else {
         await discountsAPI.create(payload);
       }
@@ -149,16 +150,6 @@ export const AdminDiscounts = () => {
     }
   };
 
-  const isDiscountActive = (discount) => {
-    const today = new Date();
-    const start = discount.start_date ? new Date(discount.start_date) : null;
-    const end = discount.end_date ? new Date(discount.end_date) : null;
-
-    if (start && today < start) return false;
-    if (end && today > end) return false;
-    return discount.is_active !== false;
-  };
-
   if (loading) {
     return <div className="loading">Загрузка скидок...</div>;
   }
@@ -172,9 +163,24 @@ export const AdminDiscounts = () => {
         </button>
       </div>
 
-      {showForm && (
-        <div className="admin-modal-overlay" onClick={resetForm}>
-          <div className="admin-modal-card" onClick={(e) => e.stopPropagation()}>
+      <AnimatePresence>
+        {showForm && (
+        <motion.div
+          className="admin-modal-overlay"
+          onClick={resetForm}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+        >
+          <motion.div
+            className="admin-modal-card"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, y: 22, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 14, scale: 0.98 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="admin-modal-header">
               <div>
                 <span className="admin-modal-caption">Скидки</span>
@@ -182,8 +188,13 @@ export const AdminDiscounts = () => {
                 <p>Настрой товар, размер скидки и период действия в одном окне.</p>
               </div>
 
-              <button type="button" className="admin-modal-close" onClick={resetForm}>
-                Закрыть
+              <button
+                type="button"
+                className="admin-modal-close"
+                onClick={resetForm}
+                aria-label="Закрыть"
+              >
+                ×
               </button>
             </div>
 
@@ -262,9 +273,10 @@ export const AdminDiscounts = () => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       <div className="admin-filters">
         <div className="search-box">

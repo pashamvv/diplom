@@ -29,7 +29,16 @@ export const AdminLayout = () => {
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="admin-sidebar-top">
           <div className="admin-sidebar-brand">
-            <span className="admin-sidebar-brand-icon">NA</span>
+            <span className="admin-sidebar-brand-icon" aria-hidden="true">
+              <svg className="admin-sidebar-brand-svg" viewBox="0 0 40 40">
+                <rect x="8" y="10" width="24" height="18" rx="4" />
+                <path d="M13 16h14" />
+                <path d="M13 20h10" />
+                <path d="M15 28v3" />
+                <path d="M25 28v3" />
+                <path d="M12 31h16" />
+              </svg>
+            </span>
             <div>
               <strong>NOCTA ADMIN</strong>
               <span>Панель управления</span>

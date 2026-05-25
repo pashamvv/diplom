@@ -35,14 +35,22 @@ export const Login = () => {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-card">
-          <h1>Вход</h1>
-          <p className="auth-subtitle">Введите ваши учётные данные</p>
+          <div className="auth-badge">NOCTA ID</div>
+
+          <div className="auth-head">
+            <div>
+              <span className="auth-kicker">Безопасный вход</span>
+              <h1>Вход</h1>
+              <p className="auth-subtitle">Введите учётные данные, чтобы продолжить покупки</p>
+            </div>
+            <span className="auth-chip">NOCTA × MAGIC</span>
+          </div>
 
           {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="email">Email:</label>
+              <label htmlFor="email">Email</label>
               <input
                 type="email"
                 id="email"
@@ -54,7 +62,7 @@ export const Login = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Пароль:</label>
+              <label htmlFor="password">Пароль</label>
               <input
                 type="password"
                 id="password"
@@ -69,6 +77,10 @@ export const Login = () => {
               {loading ? 'Загрузка...' : 'Войти'}
             </button>
           </form>
+
+          <div className="auth-note">
+            Вход защищён, а профиль и заказы синхронизируются автоматически.
+          </div>
 
           <p className="auth-switch">
             Нет аккаунта?{' '}

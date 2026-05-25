@@ -77,7 +77,49 @@ body {
   color: var(--text-primary);
   width: 100%;
   overflow-x: hidden;
-  transition: background 0.25s ease, color 0.25s ease;
+  transition:
+    background 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body,
+a,
+button,
+input,
+textarea,
+select,
+img,
+svg,
+.header,
+.theme-fab,
+.glass-panel,
+.hero,
+.hero-card,
+.metric,
+.feature-item,
+.chip,
+.c-card,
+.c-main,
+.c-pill,
+.order-card,
+.orders-summary,
+.auth-card,
+.stat-card,
+.reports-section,
+.analytics-panel,
+.admin-sidebar,
+.admin-sidebar-brand,
+.admin-nav-item,
+.admin-nav-store,
+.cart-link {
+  transition:
+    background-color 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.36s ease,
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 body {

@@ -1,21 +1,24 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./ProductCard.css";
+import { getImageSrc } from "../../utils/image";
+import { getProductPricing } from "../../utils/pricing";
 
-const BACKEND_URL = "http://127.0.0.1:8000";
 const FALLBACK_IMG = "/no-image.png";
 
-function getImageSrc(image) {
-  if (!image || typeof image !== "string") return FALLBACK_IMG;
+const pluralize = (count, one, few, many) => {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
 
-  const t = image.trim();
-  if (!t) return FALLBACK_IMG;
-  if (/^\d{2,4}x\d{2,4}$/i.test(t)) return FALLBACK_IMG;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+  return many;
+};
 
-  if (t.startsWith("http://") || t.startsWith("https://")) return t;
-  if (t.startsWith("/")) return `${BACKEND_URL}${t}`;
-  return `${BACKEND_URL}/${t}`;
-}
+const renderStars = (ratingValue) => {
+  const rating = Math.round(Number(ratingValue) || 0);
+  return Array.from({ length: 5 }, (_, index) => (index < rating ? "★" : "☆")).join("");
+};
 
 export const ProductCard = ({ product, onAddToCart }) => {
   const handleAddToCart = (e) => {
@@ -25,26 +28,42 @@ export const ProductCard = ({ product, onAddToCart }) => {
   };
 
   const imageSrc = getImageSrc(product?.image);
+  const { basePrice, finalPrice, discountPercent, hasDiscount } =
+    getProductPricing(product, product?.discounts);
+  const rating = Number(product?.average_rating || 0);
+  const reviewsCount = Number(product?.reviews_count || 0);
 
   return (
     <Link to={`/product/${product?.id}`} className="product-card-link">
       <div className="product-card">
         <div className="product-image">
-          <img
-            src={imageSrc}
-            alt={product?.name || "Product image"}
-            loading="lazy"
-            onError={(e) => {
-              e.currentTarget.src = FALLBACK_IMG;
-            }}
-          />
-          {product?.discount && (
-            <div className="discount-badge">-{product.discount}%</div>
+          <div className="product-image-glow" />
+          <div className="product-image-stage">
+            <img
+              src={imageSrc}
+              alt={product?.name || "Product image"}
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = FALLBACK_IMG;
+              }}
+            />
+          </div>
+          {hasDiscount && (
+            <div className="discount-badge">-{discountPercent}%</div>
           )}
         </div>
 
         <div className="product-info">
           <h3 className="product-name">{product?.name}</h3>
+
+          {(reviewsCount > 0 || rating > 0) && (
+            <div className="product-rating">
+              <span className="stars">{renderStars(rating)}</span>
+              <span className="rating-value">
+                {rating > 0 ? rating.toFixed(1) : '0.0'} · {reviewsCount} {pluralize(reviewsCount, 'отзыв', 'отзыва', 'отзывов')}
+              </span>
+            </div>
+          )}
 
           <p className="product-category">
             {typeof product?.category === "object"
@@ -53,7 +72,10 @@ export const ProductCard = ({ product, onAddToCart }) => {
           </p>
 
           <div className="product-price">
-            <span className="price-new">{Number(product?.price ?? 0).toFixed(0)}₽</span>
+            {hasDiscount && (
+              <span className="price-old">{basePrice.toFixed(0)}₽</span>
+            )}
+            <span className="price-new">{finalPrice.toFixed(0)}₽</span>
           </div>
 
           <button className="add-to-cart-btn" onClick={handleAddToCart}>

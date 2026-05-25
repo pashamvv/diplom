@@ -2,12 +2,18 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '../../components/ProductCard/ProductCard';
 import { useCart } from '../../hooks/useCart';
-import { productsAPI, categoriesAPI } from '../../api/endpoints';
+import { productsAPI, categoriesAPI, discountsAPI } from '../../api/endpoints';
+import {
+  getProductPricing,
+  hasEmbeddedDiscountData,
+  isDiscountActive,
+} from '../../utils/pricing';
 import './Catalog.css';
 
 export const Catalog = () => {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,25 +26,44 @@ export const Catalog = () => {
 
   const searchQuery = searchParams.get('search') || '';
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const normalizedSelectedCategory = String(selectedCategory).toLowerCase();
 
   const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
+      const productsResponse = await productsAPI.getAll();
+      const productsData = Array.isArray(productsResponse?.data)
+        ? productsResponse.data
+        : productsResponse?.data?.items || [];
 
-      const params = {
-        category: selectedCategory === 'all' ? undefined : selectedCategory,
-        min_price: priceRange[0],
-        max_price: priceRange[1],
-      };
+      let discountsData = [];
 
-      const response = await productsAPI.getAll(params);
-      setProducts(response.data || []);
+      const productsContainDiscounts = productsData.some(hasEmbeddedDiscountData);
+
+      if (!productsContainDiscounts) {
+        try {
+          const discountsResponse = await discountsAPI.getAll({ publicOnly: true });
+          discountsData = Array.isArray(discountsResponse?.data)
+            ? discountsResponse.data
+            : discountsResponse?.data?.items || [];
+        } catch (discountError) {
+          console.warn(
+            'Discounts are unavailable, catalog will be shown without separate discounts:',
+            discountError
+          );
+        }
+      }
+
+      setProducts(productsData);
+      setDiscounts(discountsData.filter(isDiscountActive));
     } catch (error) {
       console.error('Error loading products:', error);
+      setProducts([]);
+      setDiscounts([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, priceRange]);
+  }, []);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -51,33 +76,70 @@ export const Catalog = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [loadProducts, searchQuery]);
+  }, [loadProducts]);
 
   useEffect(() => {
     loadCategories();
   }, [loadCategories]);
 
-  const filteredProducts = useMemo(() => {
-    if (!normalizedSearchQuery) {
-      return products;
-    }
+  const productsWithPricing = useMemo(() => {
+    return products.map((product) => {
+      const productDiscounts = discounts.filter(
+        (discount) => Number(discount?.product_id) === Number(product?.id)
+      );
+      const embeddedDiscounts = Array.isArray(product?.discounts)
+        ? product.discounts
+        : [
+            product?.discount_data,
+            product?.discount_info,
+            product?.active_discount,
+          ].filter(Boolean);
+      const mergedDiscounts = [...embeddedDiscounts, ...productDiscounts];
+      const pricing = getProductPricing(product, mergedDiscounts);
 
-    return products.filter((product) => {
+      return {
+        ...product,
+        discounts: mergedDiscounts,
+        discount_percent: pricing.discountPercent,
+        final_price: pricing.finalPrice,
+        original_price: pricing.basePrice,
+      };
+    });
+  }, [discounts, products]);
+
+  const filteredProducts = useMemo(() => {
+    return productsWithPricing.filter((product) => {
+      const categoryIdText = String(
+        product?.category_id ?? product?.category?.id ?? ''
+      ).toLowerCase();
+      const categoryNameText = String(
+        product?.category?.name ?? product?.category ?? ''
+      ).toLowerCase();
       const idText = String(product?.id ?? '');
       const nameText = String(product?.name ?? '').toLowerCase();
       const descriptionText = String(product?.description ?? '').toLowerCase();
-      const categoryText = String(
-        product?.category?.name ?? product?.category ?? ''
-      ).toLowerCase();
+      const productPrice = Number(product?.final_price ?? product?.price ?? 0);
 
-      return (
+      const matchesCategory =
+        normalizedSelectedCategory === 'all' ||
+        categoryIdText === normalizedSelectedCategory ||
+        categoryNameText === normalizedSelectedCategory;
+
+      const matchesPrice =
+        productPrice >= Number(priceRange[0] ?? 0) &&
+        productPrice <= Number(priceRange[1] ?? Number.MAX_SAFE_INTEGER);
+
+      const matchesSearch =
+        !normalizedSearchQuery ||
         idText.includes(normalizedSearchQuery) ||
         nameText.includes(normalizedSearchQuery) ||
         descriptionText.includes(normalizedSearchQuery) ||
-        categoryText.includes(normalizedSearchQuery)
-      );
+        categoryIdText.includes(normalizedSearchQuery) ||
+        categoryNameText.includes(normalizedSearchQuery);
+
+      return matchesCategory && matchesPrice && matchesSearch;
     });
-  }, [products, normalizedSearchQuery]);
+  }, [normalizedSearchQuery, normalizedSelectedCategory, priceRange, productsWithPricing]);
 
 
   const handleAddToCart = async (product, quantity = 1) => {
@@ -121,7 +183,8 @@ export const Catalog = () => {
 
           <div className="c-stats">
             <span className="c-pill">
-              {loading ? '…' : filteredProducts.length} товаров
+              <span className="c-pillCount">{loading ? '…' : filteredProducts.length}</span>
+              <span className="c-pillLabel">товаров</span>
             </span>
           </div>
         </div>
@@ -182,10 +245,11 @@ export const Catalog = () => {
                     <input
                       className="c-input"
                       type="number"
+                      min="0"
                       value={priceRange[0]}
                       onChange={(e) =>
                         setPriceRange([
-                          parseInt(e.target.value) || 0,
+                          Math.min(parseInt(e.target.value, 10) || 0, priceRange[1]),
                           priceRange[1],
                         ])
                       }
@@ -198,11 +262,12 @@ export const Catalog = () => {
                     <input
                       className="c-input"
                       type="number"
+                      min={priceRange[0]}
                       value={priceRange[1]}
                       onChange={(e) =>
                         setPriceRange([
                           priceRange[0],
-                          parseInt(e.target.value) || 500000,
+                          Math.max(parseInt(e.target.value, 10) || priceRange[0], priceRange[0]),
                         ])
                       }
                     />

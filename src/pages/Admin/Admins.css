@@ -72,6 +72,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   padding: 7px 12px;
   border-radius: 999px;
   background: rgba(9, 24, 43, 0.48);
@@ -81,6 +82,18 @@
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.stat-chip-svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 4px 10px rgba(255, 255, 255, 0.12));
 }
 
 .stat-icon-orders .stat-icon-chip {
@@ -262,6 +275,42 @@ h3 {
   gap: 14px;
 }
 
+.analytics-loss-grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.analytics-loss-card {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.analytics-loss-card-danger {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.18);
+}
+
+.analytics-loss-label {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.analytics-loss-card strong {
+  color: #0f172a;
+  font-size: 28px;
+  line-height: 1;
+}
+
 .analytics-bar-row {
   display: flex;
   flex-direction: column;
@@ -338,6 +387,11 @@ h3 {
   line-height: 1.5;
 }
 
+.analytics-note-left {
+  margin-top: 16px;
+  text-align: left;
+}
+
 [data-theme='dark'] .analytics-panel {
   background: rgba(15, 23, 42, 0.88);
   border: 1px solid rgba(148, 163, 184, 0.14);
@@ -358,6 +412,24 @@ h3 {
 [data-theme='dark'] .analytics-bar-meta,
 [data-theme='dark'] .analytics-note,
 [data-theme='dark'] .analytics-ring-inner span {
+  color: #9fb0c9;
+}
+
+[data-theme='dark'] .analytics-loss-card {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(148, 163, 184, 0.14);
+}
+
+[data-theme='dark'] .analytics-loss-card-danger {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.18);
+}
+
+[data-theme='dark'] .analytics-loss-card strong {
+  color: #f3f7ff;
+}
+
+[data-theme='dark'] .analytics-loss-label {
   color: #9fb0c9;
 }
 
@@ -388,6 +460,10 @@ h3 {
   .reports-grid,
   .analytics-showcase,
   .sales-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-loss-grid {
     grid-template-columns: 1fr;
   }
 
